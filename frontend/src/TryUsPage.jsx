@@ -5,10 +5,17 @@ import img from './assets/img-icon.png';
 function TryUsPage() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [prediction, setPrediction] = useState("");
+  const [desc, setDesc] = useState("");
+  const [imageUrl, setImageUrl] = useState(null); // State for image URL
 
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
+    setImageUrl(URL.createObjectURL(event.target.files[0])); // Set image URL
   };
+
+  // const handleFileChange = (event) => {
+  //   setSelectedFile(event.target.files[0]);
+  // };
 
   const handleImageUpload = async () => {
     if (!selectedFile) {
@@ -28,6 +35,8 @@ function TryUsPage() {
       if (response.ok) {
         const data = await response.json();
         setPrediction(data.result);
+        setDesc(data.desc);
+
       } else {
         console.error('Error:', response.statusText);
         setPrediction("Error occurred during prediction.");
@@ -55,9 +64,9 @@ function TryUsPage() {
         justifyContent="center"
         h="500px"
       >
-        <Heading mb="4">Upload Image</Heading>
+        <Heading mb="8">Upload Image</Heading>
         <Flex h="100px" w="100px" borderRadius="8px" mb="10px" justify="center" align="center" bg="#D6FFDF">
-          <Image src={img} alt="Upload Graphic" mb="4" />
+        {imageUrl ? <Image src={imageUrl} alt="Uploaded Graphic" mb="4" /> : <Image src={img} alt="Upload Graphic" mb="4" />}
         </Flex>
         <Input type="file" mb="4" onChange={handleFileChange} />
         <Button colorScheme="teal" onClick={handleImageUpload} w="100%">
@@ -79,9 +88,12 @@ function TryUsPage() {
         alignItems="center"
         justifyContent="center"
       >
-        <Heading mb="4">Generate Prediction</Heading>
-        <Text color="gray.500" mb="4">
+        <Heading mb="4">Prediction</Heading>
+        <Text color="gray.900" mb="4">
           {prediction || "Your prediction will be generated here"}
+        </Text>
+        <Text color="gray.500">
+          {desc || "Description will be shown here"}
         </Text>
       </Box>
     </Box>
