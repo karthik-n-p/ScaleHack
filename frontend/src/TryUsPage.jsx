@@ -1,14 +1,41 @@
-import React from 'react';
-import { Box, Heading,Flex, Button, Input, Text, Image } from '@chakra-ui/react';
+import React, { useState } from 'react';
+import { Box, Heading, Flex, Button, Input, Text, Image } from '@chakra-ui/react';
 import img from './assets/img-icon.png';
 
 function TryUsPage() {
-  const handleImageUpload = () => {
-    // Handle image upload logic
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [prediction, setPrediction] = useState("");
+
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0]);
   };
 
-  const handlePrediction = () => {
-    // Handle prediction logic
+  const handleImageUpload = async () => {
+    if (!selectedFile) {
+      alert('Please select an image to upload.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    try {
+      const response = await fetch('http://127.0.0.1:5000/classify_image', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setPrediction(data.result);
+      } else {
+        console.error('Error:', response.statusText);
+        setPrediction("Error occurred during prediction.");
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setPrediction("Error occurred during prediction.");
+    }
   };
 
   return (
@@ -30,9 +57,9 @@ function TryUsPage() {
       >
         <Heading mb="4">Upload Image</Heading>
         <Flex h="100px" w="100px" borderRadius="8px" mb="10px" justify="center" align="center" bg="#D6FFDF">
-        <Image src={img} alt="Upload Graphic" mb="4" />
+          <Image src={img} alt="Upload Graphic" mb="4" />
         </Flex>
-        <Input type="file" mb="4" />
+        <Input type="file" mb="4" onChange={handleFileChange} />
         <Button colorScheme="teal" onClick={handleImageUpload} w="100%">
           Upload
         </Button>
@@ -53,15 +80,9 @@ function TryUsPage() {
         justifyContent="center"
       >
         <Heading mb="4">Generate Prediction</Heading>
-        {/* Placeholder for prediction display */}
-        
         <Text color="gray.500" mb="4">
-          Your prediction will be generated here
+          {prediction || "Your prediction will be generated here"}
         </Text>
-        {/* Button for generating prediction */}
-        <Button colorScheme="teal" onClick={handlePrediction} w="100%">
-          Predict
-        </Button>
       </Box>
     </Box>
   );
